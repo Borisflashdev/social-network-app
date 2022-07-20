@@ -31,12 +31,6 @@ const store = createStore({
                 })
             });
             
-        },
-        addComment(_, payload) {
-            axios.post(`https://social-network-app-e1fd3-default-rtdb.europe-west1.firebasedatabase.app/comments.json`, {
-                comment: payload.comment,
-                // author: payload.userName,
-            });
         }
     },
     mutations: {

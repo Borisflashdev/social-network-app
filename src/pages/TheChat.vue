@@ -22,7 +22,12 @@
                 <textarea id="" cols="100" rows="5" v-model="comment"></textarea>
                 <base-button class="comment-btn" @click="addComment">Add Comment</base-button>
             </div>
-            <base-comment v-for="commentData in commentsData" :key="commentData.id" :commentData="commentData"></base-comment>
+            <base-comment 
+            v-for="commentData in commentsData" 
+            :key="commentData.id" 
+            :commentData="commentData"
+            @likeCom="likeCom"
+            ></base-comment>
         </div>
     </div>
 </template>
@@ -35,32 +40,37 @@ export default {
         return {
             editAcc: false,
             comment: '',
-            commentsData: []
+            commentsData: [],
+            comIdLike: null
         }
     },
     methods: {
-        addComment() {
+        async addComment() {
             if (this.comment === '') {
                 return;
             }
             // const author = this.$store.state.userName;
-            this.$store.dispatch('addComment', {
+
+            await axios.post(`https://social-network-app-e1fd3-default-rtdb.europe-west1.firebasedatabase.app/comments.json`, {
                 comment: this.comment,
-                // userName: author,
+                likes: 0,
+                dislikes: 0
+                // author: author,
             });
+
             this.comment = '';
             this.renderComments();
         },
         renderComments() {
-
             axios.get(`https://social-network-app-e1fd3-default-rtdb.europe-west1.firebasedatabase.app/comments.json`).then((responseData) => {
                 const comments = [];
                 for (const id in responseData.data) {
                     comments.push({
                         id: id, 
-                        com: responseData.data[id].comment
+                        com: responseData.data[id].comment,
+                        likes: responseData.data[id].likes,
+                        dislikes: responseData.data[id].dislikes
                     });
-                    console.log(id);
                 }
                 this.commentsData = comments;
             });
