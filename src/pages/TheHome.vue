@@ -4,9 +4,22 @@
         <p>A Social Networking App or SNA (sometimes called a Social Networking Site) is an online platform which people use to 
         build social networks or social relationships with other people who share similar personal or career content, interests, 
         activities, backgrounds or real-life connections.</p>
-        <p><router-link to="/chat" class="link">Go to Chat</router-link> or <router-link to="/signup" class="link">Register</router-link></p>
+        <p>
+            <router-link to="/chat" class="link" v-if="isAuth">Go to Chat</router-link>
+            <router-link to="/signup" class="link" v-else>Register</router-link>
+        </p>
     </base-card>
 </template>
+
+<script>
+export default {
+    computed: {
+        isAuth() {
+            return this.$store.getters.isAuthenticated;
+        }
+    }
+}
+</script>
 
 <style scoped>
 h1 {

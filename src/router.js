@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import store from './index.js';
 
 import TheHome from './pages/TheHome.vue';
 import TheChat from './pages/TheChat.vue';
@@ -10,10 +11,20 @@ const router = createRouter({
     routes: [
         { path: '/', redirect: '/home' },
         { path: '/home', component: TheHome },
-        { path: '/login', component: TheLogin },
-        { path: '/signup', component: SignUp },
-        { path: '/chat', component: TheChat }
+        { path: '/login', component: TheLogin, meta: { requiresUnauth: true } },
+        { path: '/signup', component: SignUp, meta: { requiresUnauth: true } },
+        { path: '/chat', component: TheChat, meta: { requiresAuth: true } }
     ]
+});
+
+router.beforeEach(function(to, _, next) {
+    if (to.meta.requiresAuth && !store.getters.isAuthenticated) {
+        next('/signup');
+    } else if (to.meta.requiresUnauth && store.getters.isAuthenticated) {
+        next('/home')
+    } else {
+        next();
+    }
 });
 
 export default router;

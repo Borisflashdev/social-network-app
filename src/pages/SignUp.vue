@@ -4,7 +4,7 @@
             <div>
                 <h2>Sign Up</h2>
             </div>
-            <form @submit.prevent="signup">
+            <form @submit="signup">
                 <div class="form-action">
                     <input
                     type="email"
@@ -13,15 +13,6 @@
                     placeholder="Email" 
                     v-model="email">
                     <p class="invalid-text" v-show="isInvalid.email">Please enter a valid Email Address.</p>
-                </div>
-                <div class="form-action">
-                    <input
-                    type="text"
-                    @click="isInvalid.userName = false"
-                    :class="{invalid: isInvalid.userName}"
-                    placeholder="Username" 
-                    v-model="userName">
-                    <p class="invalid-text" v-show="isInvalid.userName">Please enter a valid Username.</p>
                 </div>
 
                 <div class="form-action">
@@ -47,6 +38,7 @@
                 <div class="form-action">
                     <input type="checkbox" id="showPassword" :value="true" v-model="hidePassword" >
                     <label for="showPassword">Show Password</label>
+                    <p class="invalid-text" v-show="isError">Something went wrong, please refresh and try again later.</p>
                 </div>
 
                 <div class="btn">
@@ -61,17 +53,18 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
     data() {
         return {
             hidePassword: false,
             email: '',
             password: '',
-            userName: '',
             confirmPassword: '',
+            isError: false,
             isInvalid: {
                 email: false,
-                userName: false,
                 password: false,
                 confirmPassword: false
             }
@@ -92,10 +85,6 @@ export default {
                 this.isInvalid.email = true;
                 return;
             }
-            if (this.userName.length === 0) {
-                this.isInvalid.userName = true;
-                return;
-            }
             if (this.password.length < 6) {
                 this.isInvalid.password = true;
                 return;
@@ -105,11 +94,30 @@ export default {
                 return;
             }
             
-            this.$store.dispatch('signup', {
+            axios.post(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBS_EXdZFR3ZpAsPmEIHx2Ghp8VFapWrX0`, {
                 email: this.email,
-                password: this.password,    
-                userName: this.userName
+                password: this.password,
+                returnSecureToken: true
+            }).then((responseData) => {
+                console.log(responseData);
+                this.$store.state.email = this.email;
+                this.$store.state.token = responseData.idToken;
+                this.$store.state.userId = responseData.localId;
+                this.$store.state.tokenExpiration = responseData.expiresIn;
+                localStorage.setItem('token', responseData.idToken);
+                localStorage.setItem('userId', responseData.localId);
+                localStorage.setItem('email', this.email);
+            }).catch((error) => {
+                console.log(error);
+                this.isError = true;
             });
+
+            if (this.isError === true) {
+                return;
+            } else if (this.isError === false) {
+                this.$router.replace('/home');
+                window.location.reload();
+            }
         }
     }
 }

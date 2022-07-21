@@ -4,16 +4,31 @@
             <div>
                 <h2>Login</h2>
             </div>
-            <form>
+            <form @submit="login">
                 <div class="form-action">
-                    <input type="email" id="email" placeholder="Email">
+                    <input 
+                    type="email" 
+                    id="email" 
+                    placeholder="Email"
+                    :class="{invalid: invalidEmail}"
+                    @click="invalidEmail = false"
+                    v-model="email">
+                    <p class="invalid-text" v-show="invalidEmail">Please enter a valid Email.</p>
                 </div>
                 <div class="form-action">
-                    <input :type="passwordType" id="password" placeholder="Password">
+                    <input 
+                    :type="passwordType" 
+                    id="password" 
+                    placeholder="Password"
+                    :class="{invalid: invalidPassword}"
+                    @click="invalidPassword = false"
+                    v-model="password">
+                    <p class="invalid-text" v-show="invalidPassword">Please enter a valid Password.</p>
                 </div>
                 <div class="form-action">
                     <input type="checkbox" id="showPassword" :value="true" v-model="hidePassword" >
                     <label for="showPassword">Show Password</label>
+                    <p class="invalid-text" v-show="isError">Something went wrong, please refresh or try again later.</p>
                 </div>
                 <div class="btn">
                     <base-button>Login</base-button>
@@ -27,10 +42,17 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
     data() {
         return {
-            hidePassword: false
+            hidePassword: false,
+            email: '',
+            password: '',
+            invalidPassword: false,
+            invalidEmail: false,
+            isError: false
         }
     },
     computed: {
@@ -39,6 +61,44 @@ export default {
                 return 'password';
             } else {
                 return 'text';
+            }
+        },
+    },
+    methods: {
+        async login() {
+            this.isError = false;
+
+            if (this.email === '') {
+                this.invalidEmail = true
+                return;
+            }
+            if (this.password === '') {
+                this.invalidPassword = true;
+                return;
+            }
+
+            await axios.post(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBS_EXdZFR3ZpAsPmEIHx2Ghp8VFapWrX0`, {
+                email: this.email,
+                password: this.password,
+                returnSecureToken: true
+            }).then((responseData) => {
+                console.log(responseData);
+                this.$store.state.email = this.email;
+                this.$store.state.token = responseData.idToken;
+                this.$store.state.userId = responseData.localId;
+                this.$store.state.tokenExpiration = responseData.expiresIn;
+                localStorage.setItem('token', responseData.idToken);
+                localStorage.setItem('userId', responseData.localId);
+                localStorage.setItem('email', this.email);
+            }).catch((error) => {
+                console.log(error);
+                this.isError = true;
+            });
+
+            if (this.isError === true) {
+                return;
+            } else if (this.isError === false) {
+                this.$router.replace('/home');
             }
         }
     }
@@ -120,5 +180,17 @@ input:focus {
 
 .link:hover {
     color: white;
+}
+
+.invalid {
+    border-color: #d9534f;
+    box-shadow:0 0 8px 0 #d9534f;
+}
+
+.invalid-text {
+    color: #d9534f;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-size: 14px;
 }
 </style>

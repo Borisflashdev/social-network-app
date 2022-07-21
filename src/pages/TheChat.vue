@@ -1,19 +1,22 @@
 <template>
     <div class="wrapper-big">
-        <base-dialog :show="editAcc" @close="editAcc = false">
+        <base-dialog :show="logOut" @close="logOut = false">
             <template v-slot:header>
-                <p class="acc-details-title">Account Details</p>
+                <p class="acc-details-title">Are you sure you want to log out?</p>
+            </template>
+            <template v-slot:actions>
+                <base-button @click="logout">Yes</base-button>
+                <base-button @click="logOut = false">Cancle</base-button>
             </template>
         </base-dialog>
 
         <div class="card user-card">
             <div class="wrapper">
-                <h2>BokiKing333</h2>
+                <h2>{{ userName }}</h2>
             </div>
             <div class="btn-wrapper">
-                <base-button class="delete-btn btn">Delete Account</base-button>
-                <base-button class="btn" @click="editAcc = true">Edit Account</base-button><br>
-                <base-button class="btn">Logout</base-button>
+                <base-button><router-link class="btn-link" to="/home">Home</router-link></base-button>
+                <base-button class="btn" @click="logoutBtn">Logout</base-button>
             </div>
         </div>
 
@@ -26,7 +29,7 @@
             v-for="commentData in commentsData" 
             :key="commentData.id" 
             :commentData="commentData"
-            @likeCom="likeCom"
+            @updateCom="updateCom"
             ></base-comment>
         </div>
     </div>
@@ -34,32 +37,39 @@
 
 <script>
 import axios from 'axios';
+import BaseButton from '@/components/ui/BaseButton.vue';
 
 export default {
+  components: { BaseButton },
     data() {
         return {
-            editAcc: false,
+            logOut: false,
             comment: '',
             commentsData: [],
             comIdLike: null
         }
     },
+    computed: {
+        userName() {
+            return this.$store.state.email;
+        }
+    },
     methods: {
       // Shone
-      likeCom() {
+      updateCom() {
         this.renderComments()
       },
         async addComment() {
             if (this.comment === '') {
                 return;
             }
-            // const author = this.$store.state.userName;
+            const author = this.$store.state.email;
 
             await axios.post(`https://social-network-app-e1fd3-default-rtdb.europe-west1.firebasedatabase.app/comments.json`, {
                 comment: this.comment,
                 likes: 0,
-                dislikes: 0
-                // author: author,
+                dislikes: 0,
+                author: author
             });
 
             this.comment = '';
@@ -73,11 +83,24 @@ export default {
                         id: id, 
                         com: responseData.data[id].comment,
                         likes: responseData.data[id].likes,
-                        dislikes: responseData.data[id].dislikes
+                        dislikes: responseData.data[id].dislikes,
+                        author: responseData.data[id].author
                     });
                 }
                 this.commentsData = comments;
             });
+        },
+        logoutBtn() {
+            this.logOut = true;
+        },
+        logout() {
+            this.$store.state.email = null;
+            this.$store.state.token = null;
+            this.$store.state.userId = null;
+            this.$store.state.tokenExpiration = null;
+            this.logOut = false;
+
+            this.$router.replace('/home');
         }
     },
     created() {
@@ -108,7 +131,7 @@ export default {
 .user-card {
   max-width: 20rem;
   margin-left: 2rem;
-  height: 180px !important;
+  height: 130px !important;
 }
 
 .wrapper {
@@ -125,16 +148,6 @@ export default {
     height: 130px;
     width: 130px;
     border-radius: 100px;
-}
-
-.delete-btn {
-    background-color: #d9534f !important;
-}
-
-.delete-btn:hover,
-.delete-btn:focus {
-  background-color: red !important;
-  box-shadow:0 0 8px 0 red !important;
 }
 
 .acc-details-title {
@@ -154,5 +167,10 @@ export default {
 
 .btn {
     margin: 0.5rem;
+}
+
+.btn-link {
+    color: white !important;
+    text-decoration: none !important;
 }
 </style>
