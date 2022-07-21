@@ -45,6 +45,10 @@ export default {
         }
     },
     methods: {
+      // Shone
+      likeCom() {
+        this.renderComments()
+      },
         async addComment() {
             if (this.comment === '') {
                 return;
