@@ -15,7 +15,7 @@
                 <h2>{{ userName }}</h2>
             </div>
             <div class="btn-wrapper">
-                <base-button><router-link class="btn-link" to="/home">Home</router-link></base-button>
+                <base-button @click="home">Home</base-button>
                 <base-button class="btn" @click="logoutBtn">Logout</base-button>
             </div>
         </div>
@@ -69,7 +69,9 @@ export default {
                 comment: this.comment,
                 likes: 0,
                 dislikes: 0,
-                author: author
+                author: author,
+                likesId: ['likes'],
+                dislikesId: ['dislikes']
             });
 
             this.comment = '';
@@ -79,12 +81,14 @@ export default {
             axios.get(`https://social-network-app-e1fd3-default-rtdb.europe-west1.firebasedatabase.app/comments.json`).then((responseData) => {
                 const comments = [];
                 for (const id in responseData.data) {
-                    comments.push({
+                    comments.unshift({
                         id: id, 
                         com: responseData.data[id].comment,
                         likes: responseData.data[id].likes,
                         dislikes: responseData.data[id].dislikes,
-                        author: responseData.data[id].author
+                        author: responseData.data[id].author,
+                        likesId: responseData.data[id].likesId,
+                        dislikesId: responseData.data[id].dislikesId
                     });
                 }
                 this.commentsData = comments;
@@ -100,11 +104,19 @@ export default {
             this.$store.state.tokenExpiration = null;
             this.logOut = false;
 
+            localStorage.clear('token');
+            localStorage.clear('userId');
+            localStorage.clear('email');
+
             this.$router.replace('/home');
+        },
+        home() {
+            this.$router.push('/home');
         }
     },
     created() {
         this.renderComments();
+        console.log(this.$store.state.email);
     }
 }
 </script>

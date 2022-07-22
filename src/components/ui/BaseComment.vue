@@ -40,6 +40,8 @@ export default {
             isDisliked: false,
             likesUpdate: null,
             dislikesUpdate: null,
+            likesIdUpdate: [],
+            dislikesIdUpdate: []
         }
     },
     computed: {
@@ -54,6 +56,15 @@ export default {
         }
     },
     methods: {
+        async deleteComment() {
+            const commentId = this.commentData.id;
+
+            await axios.delete(`https://social-network-app-e1fd3-default-rtdb.europe-west1.firebasedatabase.app/comments/${commentId}.json`).then((responseData) => {
+                console.log(responseData);
+            });
+
+            this.$emit('updateCom');
+        },
         async likeCom() {
             const commentData = this.commentData;
             const id = commentData.id;
@@ -61,16 +72,13 @@ export default {
             if (this.isLiked === false && this.isDisliked === false) {
                 this.dislikesUpdate = commentData.dislikes;
                 this.likesUpdate = commentData.likes + 1;
-                console.log(1);
             } else if (this.isLiked === false && this.isDisliked === true) {
                 this.dislikesUpdate = commentData.dislikes - 1;
                 this.likesUpdate = commentData.likes + 1;
                 this.isDisliked = false;
-                console.log(2);
             } else if (this.isLiked === true) {
                 this.dislikesUpdate = commentData.dislikes;
                 this.likesUpdate = commentData.likes - 1;
-                console.log(3);
             }
 
             // Ovde sam ti dodao await da bi se posle toga izvrsio $emit
@@ -82,7 +90,9 @@ export default {
             await axios.patch(`https://social-network-app-e1fd3-default-rtdb.europe-west1.firebasedatabase.app/comments/${id}.json`, {
                 // comment: commentData.com
                 dislikes: this.dislikesUpdate,
-                likes: this.likesUpdate
+                likes: this.likesUpdate,
+                dislikesId: this.dislikesIdUpdate,
+                likesId: this.likesIdUpdate
             });
 
             this.isLiked = !this.isLiked
@@ -114,7 +124,9 @@ export default {
             await axios.patch(`https://social-network-app-e1fd3-default-rtdb.europe-west1.firebasedatabase.app/comments/${id}.json`, {
                 // comment: commentData.com,
                 dislikes: this.dislikesUpdate,
-                likes:  this.likesUpdate
+                likes:  this.likesUpdate,
+                dislikesId: this.dislikesIdUpdate,
+                likesId: this.likesIdUpdate
             });
 
             this.isDisliked = !this.isDisliked;

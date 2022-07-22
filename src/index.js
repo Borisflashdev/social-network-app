@@ -33,6 +33,7 @@ const store = createStore({
                 });
             }
         }
+        
         // login(context, payload) {
         //     axios.post(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBS_EXdZFR3ZpAsPmEIHx2Ghp8VFapWrX0`, {
         //         email: payload.email,

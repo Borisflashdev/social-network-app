@@ -4,7 +4,7 @@
             <div>
                 <h2>Sign Up</h2>
             </div>
-            <form @submit="signup">
+            <form @submit.prevent="signup">
                 <div class="form-action">
                     <input
                     type="email"
@@ -53,7 +53,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import axios from 'axios';
 
 export default {
     data() {
@@ -99,14 +99,16 @@ export default {
                 password: this.password,
                 returnSecureToken: true
             }).then((responseData) => {
-                console.log(responseData);
+                console.log(responseData.data);
                 this.$store.state.email = this.email;
-                this.$store.state.token = responseData.idToken;
-                this.$store.state.userId = responseData.localId;
-                this.$store.state.tokenExpiration = responseData.expiresIn;
-                localStorage.setItem('token', responseData.idToken);
-                localStorage.setItem('userId', responseData.localId);
+                this.$store.state.token = responseData.data.idToken;
+                this.$store.state.userId = responseData.data.localId;
+                this.$store.state.tokenExpiration = responseData.data.expiresIn;
+                
+                localStorage.setItem('token', responseData.data.idToken);
+                localStorage.setItem('userId', responseData.data.localId);
                 localStorage.setItem('email', this.email);
+
             }).catch((error) => {
                 console.log(error);
                 this.isError = true;
@@ -116,7 +118,7 @@ export default {
                 return;
             } else if (this.isError === false) {
                 this.$router.replace('/home');
-                window.location.reload();
+                // window.location.reload();
             }
         }
     }

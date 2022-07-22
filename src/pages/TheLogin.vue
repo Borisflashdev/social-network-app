@@ -4,7 +4,7 @@
             <div>
                 <h2>Login</h2>
             </div>
-            <form @submit="login">
+            <form @submit.prevent="login">
                 <div class="form-action">
                     <input 
                     type="email" 
@@ -84,12 +84,14 @@ export default {
             }).then((responseData) => {
                 console.log(responseData);
                 this.$store.state.email = this.email;
-                this.$store.state.token = responseData.idToken;
-                this.$store.state.userId = responseData.localId;
-                this.$store.state.tokenExpiration = responseData.expiresIn;
-                localStorage.setItem('token', responseData.idToken);
-                localStorage.setItem('userId', responseData.localId);
+                this.$store.state.token = responseData.data.idToken;
+                this.$store.state.userId = responseData.data.localId;
+                this.$store.state.tokenExpiration = responseData.data.expiresIn;
+
+                localStorage.setItem('token', responseData.data.idToken);
+                localStorage.setItem('userId', responseData.data.localId);
                 localStorage.setItem('email', this.email);
+
             }).catch((error) => {
                 console.log(error);
                 this.isError = true;

@@ -5,6 +5,7 @@ import TheHome from './pages/TheHome.vue';
 import TheChat from './pages/TheChat.vue';
 import TheLogin from './pages/TheLogin.vue';
 import SignUp from './pages/SignUp.vue';
+import NotFound from './pages/NotFound.vue';
 
 const router = createRouter({
     history: createWebHistory(),
@@ -13,7 +14,8 @@ const router = createRouter({
         { path: '/home', component: TheHome },
         { path: '/login', component: TheLogin, meta: { requiresUnauth: true } },
         { path: '/signup', component: SignUp, meta: { requiresUnauth: true } },
-        { path: '/chat', component: TheChat, meta: { requiresAuth: true } }
+        { path: '/chat', component: TheChat, meta: { requiresAuth: true } },
+        { path: '/:notFound(.*)', component: NotFound }
     ]
 });
 
